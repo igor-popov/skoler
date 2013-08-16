@@ -1,0 +1,68 @@
+<html lang="no">
+<head>
+	<title>Skolekarakterer</title>
+	<meta charset="utf8"/>
+	<meta name="description" content="Skolekarakterer etter leseprøve 2012">
+	<meta name="viewport" contant="width=device-width">
+	<link rel="icon" type="image/png" href="/images/favicon.ico">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" >
+	<!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
+ 	<![endif]-->
+ 	<link rel="stylesheet" href="./style/skoler.css" >
+ 	
+</head>
+<body>
+	<header>
+		<nav>
+			<ul class="nav">
+				<li>Grunnskoler</li>
+				<li>Ungdomsskoler</li>
+			</ul>
+		</nav>
+	</header>
+	<main>
+		<div class="container">
+			<h1>Skolekarakterer</h1>
+			<p>
+				<div id="map"></div>
+			</p>
+		</div>
+	</main>
+	<footer class="container">
+		<a href="https://github.com/igor-popov/skoler">GitHub project</a>
+	</footer>
+	<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script>
+		$(function()
+		{
+			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+			var osmAttrib='Map data © OpenStreetMap  contributors';
+			var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 12, attribution: osmAttrib});	
+			var map = L.map('map').fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
+			map.addLayer(osm);	
+
+			
+
+			$.get("http://avalon/skoler/json/grunskoler.geojson", function(data){
+					var initializeEachGeoJsonFeature = function (feature, layer) {
+					    // does this feature have a property named popupContent?
+					    if (feature.properties && feature.properties.popupContent) {
+					        layer.bindPopup(feature.properties.popupContent);
+					    }
+					}
+
+					L.geoJson(data, {
+					    onEachFeature: initializeEachGeoJsonFeature
+					}).addTo(map);
+
+				})
+				.fail(function(jqXHR, message){
+					alert("No data for schools:" + message);
+				});
+
+		});
+	</script>
+</body>
+</html>
