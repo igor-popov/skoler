@@ -47,9 +47,28 @@
 			
 			$.get("/skoler/json/grunskoler.geojson", function(data){
 					var initializeEachGeoJsonFeature = function (feature, layer) {
-					    // does this feature have a property named popupContent?
-					    if (feature.properties && feature.properties.popupContent) {
-					        layer.bindPopup(feature.properties.popupContent);
+					    
+					    if (feature.properties && feature.properties.school_name) {
+					    	var properties = feature.properties;
+					    	var popupText = '<table><tr><td>Navn</td><td>' + properties.school_name + 
+					    		'</td></tr><tr><td>Adresse</td><td>' + properties.address + 
+					    		'</td></tr><tr><td>Kommune</td><td>' + properties.kommune;
+
+					    	var ratingNamePrefix = 'rating_';
+
+					    	for (var name in properties){
+					    		console.log(name);
+					    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
+					    			continue;
+					    		}
+
+					    		var ratingValue = properties[name];
+					    		popupText += '</td></tr><tr><td>'+ name.substring(ratingNamePrefix.length) + '</td><td>' + ratingValue;
+					    	}
+
+					    	popupText += '</td></tr></table>'
+
+					    	layer.bindPopup(popupText);
 					    }
 					}
 
