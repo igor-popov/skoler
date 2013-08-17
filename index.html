@@ -4,7 +4,7 @@
 	<meta charset="utf8"/>
 	<meta name="description" content="Skolekarakterer etter leseprøve 2012">
 	<meta name="viewport" contant="width=device-width">
-	<link rel="icon" type="image/png" href="/images/favicon.ico">
+	<link rel="icon" type="image/png" href="./images/favicon.ico">
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" >
 	<!--[if lte IE 8]>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
@@ -34,18 +34,18 @@
 	</footer>
 	<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="./script/jquery.cookie.js"></script>
 	<script>
+
+		var initialization = function(){
+			$.cookie.json = true;
+		}();
+
 		$(function()
 		{
-			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-			var osmAttrib='Map data © OpenStreetMap  contributors';
-			var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 12, attribution: osmAttrib});	
-			var map = L.map('map').fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
-			map.addLayer(osm);	
-
+			var map = initializeMap();
 			
-
-			$.get("http://avalon/skoler/json/grunskoler.geojson", function(data){
+			$.get("/skoler/json/grunskoler.geojson", function(data){
 					var initializeEachGeoJsonFeature = function (feature, layer) {
 					    // does this feature have a property named popupContent?
 					    if (feature.properties && feature.properties.popupContent) {
@@ -62,7 +62,45 @@
 					alert("No data for schools:" + message);
 				});
 
-		});
+			});
+
+		var onMapExtentChanged = function(type, target){
+			var self = this;
+			var center = self.getCenter();
+			var zoom = self.getZoom();
+
+			$.cookie('map_center', center);
+			$.cookie('map_zoom', zoom);
+
+		};
+
+		var initializeMap = function(){
+			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+			var osmAttrib='Map data © OpenStreetMap  contributors';
+			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 15, attribution: osmAttrib});	
+
+			var map = L.map('map');
+
+			var center = $.cookie('map_center');
+			var zoom = $.cookie('map_zoom'); 
+
+			if (center === undefined || center === zoom){
+				map.fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
+			}
+			else{
+				map.setView(center, zoom);
+			}
+			
+			map.addLayer(osm);	
+
+			$(map).bind("moveend", onMapExtentChanged);
+			$(map).bind("zoomend", onMapExtentChanged);
+			$(map).bind("dragend", onMapExtentChanged);
+			
+
+			return map;
+		}
+
 	</script>
 </body>
 </html>
