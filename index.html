@@ -16,8 +16,8 @@
 	<header>
 		<nav>
 			<ul class="nav">
-				<li>Grunnskoler</li>
-				<li>Ungdomsskoler</li>
+				<li><a id="show_grunnskoler" href="#">Grunnskoler</a></li>
+				<li><a id="show_ungdomskoler" href="#">Ungdomsskoler</a></li>
 			</ul>
 		</nav>
 	</header>
@@ -39,14 +39,13 @@
 
 		var initialization = function(){
 			$.cookie.json = true;
+
 		}();
 
-		$(function()
-		{
+		$(function(){
 			var map = initializeMap();
 			
-			$.get("/skoler/json/grunskoler.geojson", function(data){
-					var initializeEachGeoJsonFeature = function (feature, layer) {
+			var initializeEachGeoJsonFeature = function (feature, layer) {
 					    
 					    if (feature.properties && feature.properties.school_name) {
 					    	var properties = feature.properties;
@@ -72,7 +71,11 @@
 					    }
 					}
 
-					L.geoJson(data, {
+			var schoolLayer;
+
+			var loadGrunnskoler = function(){
+				$.get("/skoler/json/grunskoler.geojson", function(data){
+					schoolLayer = L.geoJson(data, {
 					    onEachFeature: initializeEachGeoJsonFeature
 					}).addTo(map);
 
@@ -80,8 +83,43 @@
 				.fail(function(jqXHR, message){
 					alert("No data for schools:" + message);
 				});
+			}
 
+			var loadUngdomskoler = function(){
+				$.get("/skoler/json/ungdomskoler.geojson", function(data){
+					schoolLayer = L.geoJson(data, {
+					    onEachFeature: initializeEachGeoJsonFeature
+					}).addTo(map);
+
+				})
+				.fail(function(jqXHR, message){
+					alert("No data for schools:" + message);
+					return undefined;
+				});
+			}
+
+			var clearGeoJsonLayers = function(){
+				if (schoolLayer !== undefined)
+				{
+					map.removeLayer(schoolLayer);
+					schoolLayer = undefined;
+				}
+			}
+
+
+			$("#show_grunnskoler").click(function(){
+				clearGeoJsonLayers();
+				loadGrunnskoler();
 			});
+
+			$("#show_ungdomskoler").click(function(){
+				clearGeoJsonLayers();
+				loadUngdomskoler();
+			});
+
+			loadGrunnskoler();
+
+		});
 
 		var onMapExtentChanged = function(type, target){
 			var self = this;
