@@ -109,14 +109,14 @@
 		var initializeMap = function(){
 			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 			var osmAttrib='Map data © OpenStreetMap  contributors';
-			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 15, attribution: osmAttrib});	
+			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 30, attribution: osmAttrib});	
 
 			var map = L.map('map');
 
 			var center = $.cookie('map_center');
 			var zoom = $.cookie('map_zoom'); 
 
-			if (center === undefined || center === zoom){
+			if (center === undefined || undefined === zoom){
 				map.fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
 			}
 			else{
