@@ -11,7 +11,7 @@
 					    
 					    if (feature.properties && feature.properties.school_name) {
 					    	var properties = feature.properties;
-					    	var popupText = '<table><tr><td>Navn</td><td>' + properties.school_name + 
+					    	var popupText = '<table class="table table-striped map-popup table-hover table-condensed"><tr><td>Navn</td><td>' + properties.school_name + 
 					    		'</td></tr><tr><td>Adresse</td><td>' + properties.address + 
 					    		'</td></tr><tr><td>Kommune</td><td>' + properties.kommune;
 
@@ -41,6 +41,8 @@
 					    onEachFeature: initializeEachGeoJsonFeature
 					}).addTo(map);
 
+					$("#show_ungdomskoler").parent("li").removeClass("active");
+					$("#show_grunnskoler").parent("li").addClass("active");
 				})
 				.fail(function(jqXHR, message){
 					alert("No data for schools:" + message);
@@ -52,6 +54,9 @@
 					schoolLayer = L.geoJson(data, {
 					    onEachFeature: initializeEachGeoJsonFeature
 					}).addTo(map);
+
+					$("#show_ungdomskoler").parent("li").addClass("active");
+					$("#show_grunnskoler").parent("li").removeClass("active");
 
 				})
 				.fail(function(jqXHR, message){
@@ -70,11 +75,19 @@
 
 
 			$("#show_grunnskoler").click(function(){
+
+				if ($("#show_grunnskoler").parent("li").hasClass("active"))
+					return;
+
 				clearGeoJsonLayers();
 				loadGrunnskoler();
 			});
 
 			$("#show_ungdomskoler").click(function(){
+
+				if ($("#show_ungdomskoler").parent("li").hasClass("active"))
+					return;
+
 				clearGeoJsonLayers();
 				loadUngdomskoler();
 			});

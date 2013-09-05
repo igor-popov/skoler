@@ -7,3 +7,7 @@ body {
 	height: 80%;
 }
 
+.map-popup{
+	min-width:100px;
+}
+
