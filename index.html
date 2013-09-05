@@ -3,161 +3,48 @@
 	<title>Skolekarakterer</title>
 	<meta charset="utf8"/>
 	<meta name="description" content="Skolekarakterer etter leseprøve 2012">
-	<meta name="viewport" contant="width=device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/png" href="./images/favicon.ico">
+	<link rel="stylesheet" href="./style/bootstrap.min.css" >
+	<link rel="stylesheet" href="./style/bootstrap-responsive.min.css" >
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" >
 	<!--[if lte IE 8]>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.ie.css" />
  	<![endif]-->
- 	<link rel="stylesheet" href="./style/skoler.css" >
+ 	<link rel="stylesheet" href="./style/skoler.css">
  	
 </head>
 <body>
-	<header>
-		<nav>
-			<ul class="nav">
-				<li><a id="show_grunnskoler" href="#">Grunnskoler</a></li>
-				<li><a id="show_ungdomskoler" href="#">Ungdomsskoler</a></li>
-			</ul>
-		</nav>
-	</header>
-	<main>
-		<div class="container">
-			<h1>Skolekarakterer</h1>
-			<p>
-				<div id="map"></div>
-			</p>
+	<div class ="container-fluid">
+		<div class="row-fluid">
+			<div class="span10 offset1">
+				<header>
+					<h1>Skolekarakterer</h1>
+					<nav>
+						<ul class="nav">
+							<li><a id="show_grunnskoler" href="#">Grunnskoler</a></li>
+							<li><a id="show_ungdomskoler" href="#">Ungdomsskoler</a></li>
+						</ul>
+					</nav>
+				</header>
+				<main>
+					<div>
+						<p>
+							<div id="map"></div>
+						</p>
+					</div>
+				</main>
+				<footer>
+					<a href="https://github.com/igor-popov/skoler">GitHub project</a>
+				</footer>
+			</div>
 		</div>
-	</main>
-	<footer class="container">
-		<a href="https://github.com/igor-popov/skoler">GitHub project</a>
-	</footer>
+	</div>
 	<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="http://ajax.aspnetcdn.com/ajax/bootstrap/3.0.0/bootstrap.min.js"></script>
 	<script src="./script/jquery.cookie.js"></script>
-	<script>
-
-		var initialization = function(){
-			$.cookie.json = true;
-
-		}();
-
-		$(function(){
-			var map = initializeMap();
-			
-			var initializeEachGeoJsonFeature = function (feature, layer) {
-					    
-					    if (feature.properties && feature.properties.school_name) {
-					    	var properties = feature.properties;
-					    	var popupText = '<table><tr><td>Navn</td><td>' + properties.school_name + 
-					    		'</td></tr><tr><td>Adresse</td><td>' + properties.address + 
-					    		'</td></tr><tr><td>Kommune</td><td>' + properties.kommune;
-
-					    	var ratingNamePrefix = 'rating_';
-
-					    	for (var name in properties){
-					    		console.log(name);
-					    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
-					    			continue;
-					    		}
-
-					    		var ratingValue = properties[name];
-					    		popupText += '</td></tr><tr><td>'+ name.substring(ratingNamePrefix.length) + '</td><td>' + ratingValue;
-					    	}
-
-					    	popupText += '</td></tr></table>'
-
-					    	layer.bindPopup(popupText);
-					    }
-					}
-
-			var schoolLayer;
-
-			var loadGrunnskoler = function(){
-				$.get("/skoler/json/grunskoler.geojson", function(data){
-					schoolLayer = L.geoJson(data, {
-					    onEachFeature: initializeEachGeoJsonFeature
-					}).addTo(map);
-
-				})
-				.fail(function(jqXHR, message){
-					alert("No data for schools:" + message);
-				});
-			}
-
-			var loadUngdomskoler = function(){
-				$.get("/skoler/json/ungdomskoler.geojson", function(data){
-					schoolLayer = L.geoJson(data, {
-					    onEachFeature: initializeEachGeoJsonFeature
-					}).addTo(map);
-
-				})
-				.fail(function(jqXHR, message){
-					alert("No data for schools:" + message);
-					return undefined;
-				});
-			}
-
-			var clearGeoJsonLayers = function(){
-				if (schoolLayer !== undefined)
-				{
-					map.removeLayer(schoolLayer);
-					schoolLayer = undefined;
-				}
-			}
-
-
-			$("#show_grunnskoler").click(function(){
-				clearGeoJsonLayers();
-				loadGrunnskoler();
-			});
-
-			$("#show_ungdomskoler").click(function(){
-				clearGeoJsonLayers();
-				loadUngdomskoler();
-			});
-
-			loadGrunnskoler();
-
-		});
-
-		var onMapExtentChanged = function(type, target){
-			var self = this;
-			var center = self.getCenter();
-			var zoom = self.getZoom();
-
-			$.cookie('map_center', center);
-			$.cookie('map_zoom', zoom);
-
-		};
-
-		var initializeMap = function(){
-			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-			var osmAttrib='Map data © OpenStreetMap  contributors';
-			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 15, attribution: osmAttrib});	
-
-			var map = L.map('map');
-
-			var center = $.cookie('map_center');
-			var zoom = $.cookie('map_zoom'); 
-
-			if (center === undefined || center === zoom){
-				map.fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
-			}
-			else{
-				map.setView(center, zoom);
-			}
-			
-			map.addLayer(osm);	
-
-			$(map).bind("moveend", onMapExtentChanged);
-			$(map).bind("zoomend", onMapExtentChanged);
-			$(map).bind("dragend", onMapExtentChanged);
-			
-
-			return map;
-		}
-
-	</script>
+	<script src="./script/script.js"></script>
+	
 </body>
 </html>
