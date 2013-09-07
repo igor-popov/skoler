@@ -9,6 +9,10 @@ html, body, #map {
 	width:100%;
 }
 
+#map {
+	position:relative;
+	}
+
 .map-popup{
 	min-width:100px;
 }
