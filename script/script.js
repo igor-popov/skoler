@@ -36,7 +36,7 @@
 			var schoolLayer;
 
 			var loadGrunnskoler = function(){
-				$.get("/skoler/json/grunskoler.geojson", function(data){
+				$.get("./json/grunskoler.geojson", function(data){
 					schoolLayer = L.geoJson(data, {
 					    onEachFeature: initializeEachGeoJsonFeature
 					}).addTo(map);
@@ -50,7 +50,7 @@
 			}
 
 			var loadUngdomskoler = function(){
-				$.get("/skoler/json/ungdomskoler.geojson", function(data){
+				$.get("./json/ungdomskoler.geojson", function(data){
 					schoolLayer = L.geoJson(data, {
 					    onEachFeature: initializeEachGeoJsonFeature
 					}).addTo(map);
