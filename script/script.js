@@ -5,14 +5,14 @@
 		}();
 
 		$(function(){
-			function autoResizeDiv()
+			/*function autoResizeDiv()
 	        {
 	            $('#main').css('height', window.innerHeight * 0.9 +'px');
 	            $('#main').css('width', window.innerWidth +'px');
 	        }
 
 	        window.onresize = autoResizeDiv;
-	        autoResizeDiv();
+	        autoResizeDiv();*/
 
 			var map = initializeMap();
 			
@@ -20,7 +20,7 @@
 					    
 					    if (feature.properties && feature.properties.school_name) {
 					    	var properties = feature.properties;
-					    	var popupText = '<table class="table table-striped map-popup table-hover table-condensed"><tr><td>Navn</td><td>' + properties.school_name + 
+					    	var popupText = '<table class="map-popup table table-striped table-hover table-condensed"><tr><td>Navn</td><td>' + properties.school_name + 
 					    		'</td></tr><tr><td>Adresse</td><td>' + properties.address + 
 					    		'</td></tr><tr><td>Kommune</td><td>' + properties.kommune;
 

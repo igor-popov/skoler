@@ -1,13 +1,32 @@
 body { 
 	width:100%; 
+	padding: 0;
+    margin: 0;
 }
 
-#map{
-	width:100%; 
-	height: 80%;
+html, body, #map {
+	height:100%;
 }
 
 .map-popup{
 	min-width:100px;
 }
+
+@media all and (min-width: 500px)
+{
+	html, body {
+		height:auto;
+	}
+
+	body { 
+		padding: 5px;
+	    margin: 5px;
+	}
+
+	#map 
+	{
+		height: height: 80%;;
+	}
+}
+
 
