@@ -6,6 +6,7 @@ body {
 
 html, body, #map {
 	height:100%;
+	width:100%;
 }
 
 .map-popup{
@@ -25,7 +26,8 @@ html, body, #map {
 
 	#map 
 	{
-		height: height: 80%;;
+		height: height: 80%;
+		width:auto;
 	}
 }
 
