@@ -5,6 +5,15 @@
 		}();
 
 		$(function(){
+			function autoResizeDiv()
+	        {
+	            $('#main').style.height = window.innerHeight +'px';
+	            $('#main').style.width = window.innerWidth +'px';
+	        }
+	        
+	        window.onresize = autoResizeDiv;
+	        autoResizeDiv();
+
 			var map = initializeMap();
 			
 			var initializeEachGeoJsonFeature = function (feature, layer) {
