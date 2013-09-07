@@ -7,10 +7,10 @@
 		$(function(){
 			function autoResizeDiv()
 	        {
-	            $('#main').style.height = window.innerHeight +'px';
-	            $('#main').style.width = window.innerWidth +'px';
+	            $('#main').css('height', window.innerHeight * 0.9 +'px');
+	            $('#main').css('width', window.innerWidth +'px');
 	        }
-	        
+
 	        window.onresize = autoResizeDiv;
 	        autoResizeDiv();
 
