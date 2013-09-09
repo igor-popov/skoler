@@ -4,65 +4,7 @@
 
 		}();
 
-		var JsonDataParser = function()
-		{
-			return {groupRatingsByCategories : function(properties){
-					var ratingNamePrefix = 'rating_';
-
-					var groupedProperties = new Array();
-
-			    	for (var name in properties){
-			    		//console.log(name);
-			    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
-			    			continue;
-			    		}
-
-			    		var ratingValue = properties[name];
-			    		var ratingNameComponents = name.substring(ratingNamePrefix.length).split('_');
-
-			    		if (ratingNameComponents.length !== 3){
-			    			continue;
-			    		}
-
-			    		var subject = ratingNameComponents[0];
-			    		var year = ratingNameComponents[1];
-			    		var className = ratingNameComponents[2];
-
-			    		var yearData = groupedProperties[year];
-			    		if (yearData === undefined)
-			    			groupedProperties[year] = yearData = new Array();
-
-			    		var classData = yearData[className];
-
-			    		if (classData === undefined)
-			    			yearData[className] = classData = new Array();
-
-			    		classData[subject] = properties[name];
-			    	}
-
-			    	return groupedProperties;
-				},
-			collectSubjects : function(yearData){
-					var subjectNames = new Array();
-
-		    		for (var className in yearData){
-		    			var classData = yearData[className];
-		    			
-		    			for (var subjectName in classData){
-		    				if (subjectNames.indexOf(subjectName) <= -1)
-		    				{
-		    					subjectNames.push(subjectName);
-		    				}
-		    			}
-		    		}
-
-		    		return subjectNames;
-		    	},
-			trimClassLiteral : function(fullClassName){					    
-			    	return fullClassName.replace(/(^\s+(K|k)lass[^\s]?\s*)|(\s+(K|k)lass[^\s]?\s*$)/g, '');
-			    }
-			}
-		}
+		
 
 		$(function(){
 			/*function autoResizeDiv()
@@ -96,7 +38,6 @@
 					    		var yearData = ratingsByYearClassAndSubject[year];
 
 					    		var subjectNames = jsonDataParser.collectSubjects(yearData);
-					    		console.log(subjectNames);
 
 					    		yearRatingText += '<thead><tr>';
 
@@ -116,7 +57,7 @@
 					    			
 									yearRatingText += '<tr>'
 
-									yearRatingText += '<td>' + jsonDataParser.trimClassLiteral(className) + '</td>';
+									yearRatingText += '<td><strong>' + jsonDataParser.trimClassLiteral(className) + '</strong></td>';
 
 					    			for (var i = 0; i < subjectNames.length; i++){
 					    				var ratingValue = classData[subjectNames[i]];
@@ -130,16 +71,6 @@
 					    			yearRatingText += '</tr>'
 					    		}
 
-					    		/*for (var className in yearData){
-					    			var classData = yearData[className];
-					    			yearRatingText += '<tr><td>' + className + '</td>';
-					    			for (var subjectName in classData){
-					    				var ratingValue = classData[subjectName];
-					    				yearRatingText += '<td>' + ratingValue + '</td>';
-					    			}
-					    			yearRatingText += '</tr>'
-					    		}*/
-
 					    		yearRatingText += "</tbody></table>"
 					    		popupText += yearRatingText;
 					    	}
@@ -150,12 +81,32 @@
 
 			var schoolLayer;
 
+			
+
+			var loadSchoolDataAsGeoJson = function(data, targetMap)
+			{
+				var geojsonMarkerOptions = {
+							    radius: 8,
+							    fillColor: "#ff7800",
+							    color: "#000",
+							    weight: 1,
+							    opacity: 1,
+							    fillOpacity: 0.8
+							};
+
+				schoolLayer = L.geoJson(data, {
+					    onEachFeature: initializeEachGeoJsonFeature,
+					    pointToLayer: function (feature, latlng) {
+						        return L.circleMarker(latlng, geojsonMarkerOptions);
+						    }
+						}).addTo(targetMap);
+			}
+
 			var loadGrunnskoler = function(){
 				$.get("./json/grunskoler.geojson", function(data){
-					schoolLayer = L.geoJson(data, {
-					    onEachFeature: initializeEachGeoJsonFeature
-					}).addTo(map);
 
+					loadSchoolDataAsGeoJson(data, map);
+					
 					$("#show_ungdomskoler").parent("li").removeClass("active");
 					$("#show_grunnskoler").parent("li").addClass("active");
 				})
@@ -166,10 +117,9 @@
 
 			var loadUngdomskoler = function(){
 				$.get("./json/ungdomskoler.geojson", function(data){
-					schoolLayer = L.geoJson(data, {
-					    onEachFeature: initializeEachGeoJsonFeature
-					}).addTo(map);
 
+					loadSchoolDataAsGeoJson(data, map);
+					
 					$("#show_ungdomskoler").parent("li").addClass("active");
 					$("#show_grunnskoler").parent("li").removeClass("active");
 
