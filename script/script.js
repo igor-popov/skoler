@@ -18,25 +18,120 @@
 			
 			var initializeEachGeoJsonFeature = function (feature, layer) {
 					    
-					    if (feature.properties && feature.properties.school_name) {
-					    	var properties = feature.properties;
-					    	var popupText = '<table class="map-popup table table-striped table-hover table-condensed"><tr><td>Navn</td><td>' + properties.school_name + 
-					    		'</td></tr><tr><td>Adresse</td><td>' + properties.address + 
-					    		'</td></tr><tr><td>Kommune</td><td>' + properties.kommune;
+						var groupedProperties = function(properties){
+							var ratingNamePrefix = 'rating_';
 
-					    	var ratingNamePrefix = 'rating_';
+							var groupedProperties = new Array();
 
 					    	for (var name in properties){
-					    		console.log(name);
+					    		//console.log(name);
 					    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
 					    			continue;
 					    		}
 
 					    		var ratingValue = properties[name];
-					    		popupText += '</td></tr><tr><td>'+ name.substring(ratingNamePrefix.length) + '</td><td>' + ratingValue;
+					    		var ratingNameComponents = name.substring(ratingNamePrefix.length).split('_');
+
+					    		if (ratingNameComponents.length !== 3){
+					    			continue;
+					    		}
+
+					    		var subject = ratingNameComponents[0];
+					    		var year = ratingNameComponents[1];
+					    		var className = ratingNameComponents[2];
+
+					    		var yearData = groupedProperties[year];
+					    		if (yearData === undefined)
+					    			groupedProperties[year] = yearData = new Array();
+
+					    		var classData = yearData[className];
+
+					    		if (classData === undefined)
+					    			yearData[className] = classData = new Array();
+
+					    		classData[subject] = properties[name];
 					    	}
 
-					    	popupText += '</td></tr></table>'
+					    	return groupedProperties;
+						}
+
+						var collectSubjects = function(yearData){
+								var subjectNames = new Array();
+
+					    		for (var className in yearData){
+					    			var classData = yearData[className];
+					    			
+					    			for (var subjectName in classData){
+					    				if (subjectNames.indexOf(subjectName) <= -1)
+					    				{
+					    					subjectNames.push(subjectName);
+					    				}
+					    			}
+					    		}
+
+					    		return subjectNames;
+					    	}
+
+
+
+					    if (feature.properties && feature.properties.school_name) {
+					    	var properties = feature.properties;
+					    	var popupText = '<table class="map-popup table table-striped table-hover table-condensed">'
+					    	popupText += '<tr><td>Navn</td><td>' + properties.school_name + '</td></tr>';
+					    	popupText += '<tr><td>Adresse</td><td>' + properties.address + '</td></tr>';
+					    	popupText += '<tr><td>Kommune</td><td>' + properties.kommune  + '</td></tr></table>';
+
+					    	var ratingsByYearClassAndSubject = groupedProperties(properties);
+
+					    	for (var year in ratingsByYearClassAndSubject){
+					    		var yearRatingText = year + '<br><table class="map-popup table table-striped table-hover table-condensed">';
+
+					    		var yearData = ratingsByYearClassAndSubject[year];
+
+					    		var subjectNames = collectSubjects(yearData);
+					    		console.log(subjectNames);
+
+					    		yearRatingText += '<thead><tr>';
+
+								for (var i = 0; i < subjectNames.length; i++){
+									var subjectName = subjectNames[i];
+				    				yearRatingText += '<th>' + subjectName + '</th>';
+					    		}
+
+					    		yearRatingText += '</tr></thead>';
+
+					    		yearRatingText += '<tbody>';
+
+					    		for (var className in yearData){
+					    			var classData = yearData[className];
+					    			
+									yearRatingText += '<tr>'
+
+					    			for (var i = 0; i < subjectNames.length; i++){
+					    				var ratingValue = classData[subjectNames[i]];
+					    				if (ratingValue !== undefined){
+					    					yearRatingText += '<td>' + ratingValue + '</td>';
+					    				}
+					    				else{
+					    					yearRatingText += '<td></td>';
+					    				}
+					    			}
+					    			yearRatingText += '</tr>'
+					    		}
+
+					    		/*for (var className in yearData){
+					    			var classData = yearData[className];
+					    			yearRatingText += '<tr><td>' + className + '</td>';
+					    			for (var subjectName in classData){
+					    				var ratingValue = classData[subjectName];
+					    				yearRatingText += '<td>' + ratingValue + '</td>';
+					    			}
+					    			yearRatingText += '</tr>'
+					    		}*/
+
+					    		yearRatingText += "</tbody></table>"
+					    		popupText += yearRatingText;
+					    	}
 
 					    	layer.bindPopup(popupText);
 					    }
