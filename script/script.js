@@ -4,6 +4,65 @@
 
 		}();
 
+		var JsonDataParser = function()
+		{
+			this.groupRatingsByCategories = function(properties){
+					var ratingNamePrefix = 'rating_';
+
+					var groupedProperties = new Array();
+
+			    	for (var name in properties){
+			    		//console.log(name);
+			    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
+			    			continue;
+			    		}
+
+			    		var ratingValue = properties[name];
+			    		var ratingNameComponents = name.substring(ratingNamePrefix.length).split('_');
+
+			    		if (ratingNameComponents.length !== 3){
+			    			continue;
+			    		}
+
+			    		var subject = ratingNameComponents[0];
+			    		var year = ratingNameComponents[1];
+			    		var className = ratingNameComponents[2];
+
+			    		var yearData = groupedProperties[year];
+			    		if (yearData === undefined)
+			    			groupedProperties[year] = yearData = new Array();
+
+			    		var classData = yearData[className];
+
+			    		if (classData === undefined)
+			    			yearData[className] = classData = new Array();
+
+			    		classData[subject] = properties[name];
+			    	}
+
+			    	return groupedProperties;
+				}
+			this.collectSubjects = function(yearData){
+					var subjectNames = new Array();
+
+		    		for (var className in yearData){
+		    			var classData = yearData[className];
+		    			
+		    			for (var subjectName in classData){
+		    				if (subjectNames.indexOf(subjectName) <= -1)
+		    				{
+		    					subjectNames.push(subjectName);
+		    				}
+		    			}
+		    		}
+
+		    		return subjectNames;
+		    	}
+			this.trimClassLiteral = function(fullClassName){					    
+			    	return fullClassName.replace(/(^\s+(K|k)lass[^\s]?\s*)|(\s+(K|k)lass[^\s]?\s*$)/g, '');
+			    }
+		}
+
 		$(function(){
 			/*function autoResizeDiv()
 	        {
@@ -17,81 +76,30 @@
 			var map = initializeMap();
 			
 			var initializeEachGeoJsonFeature = function (feature, layer) {
-					    
-						var groupedProperties = function(properties){
-							var ratingNamePrefix = 'rating_';
-
-							var groupedProperties = new Array();
-
-					    	for (var name in properties){
-					    		//console.log(name);
-					    		if (name.substring(0, ratingNamePrefix.length) !== 'rating_'){
-					    			continue;
-					    		}
-
-					    		var ratingValue = properties[name];
-					    		var ratingNameComponents = name.substring(ratingNamePrefix.length).split('_');
-
-					    		if (ratingNameComponents.length !== 3){
-					    			continue;
-					    		}
-
-					    		var subject = ratingNameComponents[0];
-					    		var year = ratingNameComponents[1];
-					    		var className = ratingNameComponents[2];
-
-					    		var yearData = groupedProperties[year];
-					    		if (yearData === undefined)
-					    			groupedProperties[year] = yearData = new Array();
-
-					    		var classData = yearData[className];
-
-					    		if (classData === undefined)
-					    			yearData[className] = classData = new Array();
-
-					    		classData[subject] = properties[name];
-					    	}
-
-					    	return groupedProperties;
-						}
-
-						var collectSubjects = function(yearData){
-								var subjectNames = new Array();
-
-					    		for (var className in yearData){
-					    			var classData = yearData[className];
-					    			
-					    			for (var subjectName in classData){
-					    				if (subjectNames.indexOf(subjectName) <= -1)
-					    				{
-					    					subjectNames.push(subjectName);
-					    				}
-					    			}
-					    		}
-
-					    		return subjectNames;
-					    	}
-
-
 
 					    if (feature.properties && feature.properties.school_name) {
+
+					    	var jsonDataParser = new JsonDataParser();
+
 					    	var properties = feature.properties;
 					    	var popupText = '<table class="map-popup table table-striped table-hover table-condensed">'
 					    	popupText += '<tr><td>Navn</td><td>' + properties.school_name + '</td></tr>';
 					    	popupText += '<tr><td>Adresse</td><td>' + properties.address + '</td></tr>';
 					    	popupText += '<tr><td>Kommune</td><td>' + properties.kommune  + '</td></tr></table>';
 
-					    	var ratingsByYearClassAndSubject = groupedProperties(properties);
+					    	var ratingsByYearClassAndSubject = jsonDataParser.groupRatingsByCategories(properties);
 
 					    	for (var year in ratingsByYearClassAndSubject){
-					    		var yearRatingText = year + '<br><table class="map-popup table table-striped table-hover table-condensed">';
+					    		var yearRatingText = '<h3>' + year + '</h3>' + '<br><table class="map-popup table table-striped table-hover table-condensed">';
 
 					    		var yearData = ratingsByYearClassAndSubject[year];
 
-					    		var subjectNames = collectSubjects(yearData);
+					    		var subjectNames = jsonDataParser.collectSubjects(yearData);
 					    		console.log(subjectNames);
 
 					    		yearRatingText += '<thead><tr>';
+
+					    		yearRatingText += '<th>klasse</th>';
 
 								for (var i = 0; i < subjectNames.length; i++){
 									var subjectName = subjectNames[i];
@@ -106,6 +114,8 @@
 					    			var classData = yearData[className];
 					    			
 									yearRatingText += '<tr>'
+
+									yearRatingText += '<td>' + jsonDataParser.trimClassLiteral(className) + '</td>';
 
 					    			for (var i = 0; i < subjectNames.length; i++){
 					    				var ratingValue = classData[subjectNames[i]];
