@@ -6,7 +6,7 @@
 
 		var JsonDataParser = function()
 		{
-			this.groupRatingsByCategories = function(properties){
+			return {groupRatingsByCategories : function(properties){
 					var ratingNamePrefix = 'rating_';
 
 					var groupedProperties = new Array();
@@ -41,8 +41,8 @@
 			    	}
 
 			    	return groupedProperties;
-				}
-			this.collectSubjects = function(yearData){
+				},
+			collectSubjects : function(yearData){
 					var subjectNames = new Array();
 
 		    		for (var className in yearData){
@@ -57,10 +57,11 @@
 		    		}
 
 		    		return subjectNames;
-		    	}
-			this.trimClassLiteral = function(fullClassName){					    
+		    	},
+			trimClassLiteral : function(fullClassName){					    
 			    	return fullClassName.replace(/(^\s+(K|k)lass[^\s]?\s*)|(\s+(K|k)lass[^\s]?\s*$)/g, '');
 			    }
+			}
 		}
 
 		$(function(){
