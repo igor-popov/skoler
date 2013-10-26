@@ -4,17 +4,51 @@
 
 		}();
 
+		var onMapExtentChanged = function(type, target){
+			var self = this;
+			var center = self.getCenter();
+			var zoom = self.getZoom();
+
+			$.cookie('map_center', center);
+			$.cookie('map_zoom', zoom);
+		};
+
+		var initializeMap = function(){
+			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+			var osmAttrib='Map data © OpenStreetMap  contributors';
+			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 30, attribution: osmAttrib});	
+
+			var map = L.map('map');
+
+			var center = $.cookie('map_center');
+			var zoom = $.cookie('map_zoom'); 
+
+			if (center === undefined || undefined === zoom){
+				map.fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
+			}
+			else{
+				map.setView(center, zoom);
+			}
+			
+			map.addLayer(osm);	
+
+			$(map).bind("moveend", onMapExtentChanged);
+			$(map).bind("zoomend", onMapExtentChanged);
+			$(map).bind("dragend", onMapExtentChanged);
+			
+
+			return map;
+		}
 		
 
 		$(function(){
-			/*function autoResizeDiv()
-	        {
-	            $('#main').css('height', window.innerHeight * 0.9 +'px');
-	            $('#main').css('width', window.innerWidth +'px');
+			function autoResizeDiv()  {
+	        	//required because map wants some nice px instead of % during initialization
+	            $('#map').css('height','100%');
+	            $('#map').css('width','100%');
 	        }
 
-	        window.onresize = autoResizeDiv;
-	        autoResizeDiv();*/
+	        autoResizeDiv();
 
 			var map = initializeMap();
 			
@@ -161,39 +195,4 @@
 
 		});
 
-		var onMapExtentChanged = function(type, target){
-			var self = this;
-			var center = self.getCenter();
-			var zoom = self.getZoom();
-
-			$.cookie('map_center', center);
-			$.cookie('map_zoom', zoom);
-
-		};
-
-		var initializeMap = function(){
-			var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-			var osmAttrib='Map data © OpenStreetMap  contributors';
-			var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 30, attribution: osmAttrib});	
-
-			var map = L.map('map');
-
-			var center = $.cookie('map_center');
-			var zoom = $.cookie('map_zoom'); 
-
-			if (center === undefined || undefined === zoom){
-				map.fitBounds([[54, 10], [72, 15]]);//.setView({center:{lat: 65, lng: 15}, zoom:130});
-			}
-			else{
-				map.setView(center, zoom);
-			}
-			
-			map.addLayer(osm);	
-
-			$(map).bind("moveend", onMapExtentChanged);
-			$(map).bind("zoomend", onMapExtentChanged);
-			$(map).bind("dragend", onMapExtentChanged);
-			
-
-			return map;
-		}
+		
