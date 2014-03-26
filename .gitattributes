@@ -1,0 +1,8 @@
+[attr]
+# Auto detect text files and perform LF normalization
+
+* text=auto
+# Custom for Visual Studio
+textfile diff merge
+*.json textfile
+*.xml textfile
